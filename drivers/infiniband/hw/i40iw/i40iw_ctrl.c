@@ -5004,6 +5004,7 @@ enum i40iw_status_code i40iw_device_init(struct i40iw_sc_dev *dev,
 			i40iw_debug(dev, I40IW_DEBUG_DEV,
 				    "%s: PE doorbell is not enabled in CSR val 0x%x\n",
 				    __func__, val);
+			pr_err("RDMA feature not enabled!\n");
 			ret_code = I40IW_ERR_PE_DOORBELL_NOT_ENABLED;
 			return ret_code;
 		}
