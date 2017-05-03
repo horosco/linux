@@ -2447,6 +2447,7 @@ static void i40iw_handle_rcv_mpa(struct i40iw_cm_node *cm_node,
 			cm_node->state = I40IW_CM_STATE_OFFLOADED;
 			i40iw_send_ack(cm_node);
 		}
+		i40iw_send_ack(cm_node);
 		break;
 	default:
 		pr_err("%s wrong cm_node state =%d\n", __func__, cm_node->state);
