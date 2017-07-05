@@ -966,7 +966,7 @@ static enum i40iw_status_code i40iw_initialize_ieq(struct i40iw_device *iwdev)
 	info.pd_id = 2;
 	info.sq_size = 8192;
 	info.rq_size = 8192;
-	info.buf_size = 2048;
+	info.buf_size = iwdev->vsi.mss + I40IW_MTU_TO_MSS + VLAN_ETH_HLEN;
 	info.tx_buf_cnt = 16384;
 	status = i40iw_puda_create_rsrc(&iwdev->vsi, &info);
 	if (status)
