@@ -672,6 +672,7 @@ static struct ib_qp *i40iw_create_qp(struct ib_pd *ibpd,
 
 	init_info.pd = &iwpd->sc_pd;
 	init_info.qp_uk_init_info.qp_id = iwqp->ibqp.qp_num;
+	init_info.qp_uk_init_info.first_sq_wq = 1;
 	iwqp->ctx_info.qp_compl_ctx = (uintptr_t)qp;
 
 	if (init_attr->qp_type != IB_QPT_RC) {
