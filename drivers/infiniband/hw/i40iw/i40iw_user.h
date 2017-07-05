@@ -377,6 +377,7 @@ struct i40iw_qp_uk {
 	u8 rq_wqe_size;
 	u8 rq_wqe_size_multiplier;
 	bool deferred_flag;
+	u8 first_sq_wq;
 };
 
 struct i40iw_cq_uk {
@@ -408,6 +409,7 @@ struct i40iw_qp_uk_init_info {
 	u32 max_rq_frag_cnt;
 	u32 max_inline_data;
 	int abi_ver;
+	u8 first_sq_wq;
 };
 
 struct i40iw_cq_uk_init_info {

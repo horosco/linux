@@ -821,6 +821,19 @@ static enum i40iw_status_code i40iw_cq_poll_completion(struct i40iw_cq_uk *cq,
 		I40IW_RING_SET_TAIL(qp->rq_ring, array_idx + 1);
 		pring = &qp->rq_ring;
 	} else {
+
+		if (qp->first_sq_wq) {
+			qp->first_sq_wq = 0;
+			if (!wqe_idx) {
+				I40IW_RING_MOVE_HEAD_NOCHECK(cq->cq_ring);
+				I40IW_RING_MOVE_TAIL(cq->cq_ring);
+				set_64bit_val(cq->shadow_area, 0,
+					      I40IW_RING_GETCURRENT_HEAD(cq->cq_ring));
+				memset(info, 0, sizeof(struct i40iw_cq_poll_info));
+				return i40iw_cq_poll_completion(cq, info);
+			}
+		}
+
 		if (info->comp_status != I40IW_COMPL_STATUS_FLUSHED) {
 			info->wr_id = qp->sq_wrtrk_array[wqe_idx].wrid;
 			info->bytes_xfered = qp->sq_wrtrk_array[wqe_idx].wr_len;
