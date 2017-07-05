@@ -2346,6 +2346,7 @@ static enum i40iw_status_code i40iw_sc_qp_init(struct i40iw_sc_qp *qp,
 	qp->rq_tph_en = info->rq_tph_en;
 	qp->rcv_tph_en = info->rcv_tph_en;
 	qp->xmit_tph_en = info->xmit_tph_en;
+	qp->qp_uk.first_sq_wq = info->qp_uk_init_info.first_sq_wq;
 	qp->qs_handle = qp->vsi->qos[qp->user_pri].qs_handle;
 	qp->exception_lan_queue = qp->pd->dev->exception_lan_queue;
 
