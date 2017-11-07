@@ -48,7 +48,7 @@
  * @wqe: cqp wqe for header
  * @header: header for the cqp wqe
  */
-static inline void i40iw_insert_wqe_hdr(u64 *wqe, u64 header)
+void i40iw_insert_wqe_hdr(u64 *wqe, u64 header)
 {
 	wmb();            /* make sure WQE is populated before polarity is set */
 	set_64bit_val(wqe, 24, header);
@@ -4922,6 +4922,7 @@ enum i40iw_status_code i40iw_vsi_stats_init(struct i40iw_sc_vsi *vsi, struct i40
 
 	vsi->pestat = info->pestat;
 	vsi->pestat->hw = vsi->dev->hw;
+	vsi->pestat->vsi = vsi;
 
 	if (info->stats_initialize) {
 		i40iw_hw_stats_init(vsi->pestat, fcn_id, true);

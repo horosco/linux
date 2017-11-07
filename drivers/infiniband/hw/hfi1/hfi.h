@@ -164,9 +164,7 @@ extern const struct pci_error_handlers hfi1_pci_err_handler;
  * Below contains all data related to a single context (formerly called port).
  */
 
-#ifdef CONFIG_DEBUG_FS
 struct hfi1_opcode_stats_perctx;
-#endif
 
 struct ctxt_eager_bufs {
 	ssize_t size;            /* total size of eager buffers */
@@ -283,7 +281,7 @@ struct hfi1_ctxtdata {
 	u64 imask;	/* clear interrupt mask */
 	int ireg;	/* clear interrupt register */
 	unsigned numa_id; /* numa node of this context */
-	/* verbs stats per CTX */
+	/* verbs rx_stats per rcd */
 	struct hfi1_opcode_stats_perctx *opstats;
 
 	/* Is ASPM interrupt supported for this context */
@@ -1276,6 +1274,8 @@ struct hfi1_devdata {
 	/* receive context data */
 	struct hfi1_ctxtdata **rcd;
 	u64 __percpu *int_counter;
+	/* verbs tx opcode stats */
+	struct hfi1_opcode_stats_perctx __percpu *tx_opstats;
 	/* device (not port) flags, basically device capabilities */
 	u16 flags;
 	/* Number of physical ports available */
@@ -1538,11 +1538,6 @@ typedef void (*hfi1_handle_cnp)(struct hfi1_ibport *ibp, struct rvt_qp *qp,
 				u32 remote_qpn, u32 pkey, u32 slid, u32 dlid,
 				u8 sc5, const struct ib_grh *old_grh);
 
-/* We support only two types - 9B and 16B for now */
-static const hfi1_handle_cnp hfi1_handle_cnp_tbl[2] = {
-	[HFI1_PKT_TYPE_9B] = &return_cnp,
-	[HFI1_PKT_TYPE_16B] = &return_cnp_16B
-};
 #define PKEY_CHECK_INVALID -1
 int egress_pkey_check(struct hfi1_pportdata *ppd, u32 slid, u16 pkey,
 		      u8 sc5, int8_t s_pkey_index);

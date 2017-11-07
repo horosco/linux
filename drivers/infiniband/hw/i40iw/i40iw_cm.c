@@ -1188,7 +1188,7 @@ static void i40iw_handle_close_entry(struct i40iw_cm_node *cm_node, u32 rem_node
  * i40iw_cm_timer_tick - system's timer expired callback
  * @pass: Pointing to cm_core
  */
-static void i40iw_cm_timer_tick(unsigned long pass)
+static void i40iw_cm_timer_tick(struct timer_list *t)
 {
 	unsigned long nexttimeout = jiffies + I40IW_LONG_TIME;
 	struct i40iw_cm_node *cm_node;
@@ -1196,10 +1196,9 @@ static void i40iw_cm_timer_tick(unsigned long pass)
 	struct list_head *list_core_temp;
 	struct i40iw_sc_vsi *vsi;
 	struct list_head *list_node;
-	struct i40iw_cm_core *cm_core = (struct i40iw_cm_core *)pass;
+	struct i40iw_cm_core *cm_core = from_timer(cm_core, t, tcp_timer);
 	u32 settimer = 0;
 	unsigned long timetosend;
-	struct i40iw_sc_dev *dev;
 	unsigned long flags;
 
 	struct list_head timer_list;
@@ -1270,7 +1269,6 @@ static void i40iw_cm_timer_tick(unsigned long pass)
 		spin_unlock_irqrestore(&cm_node->retrans_list_lock, flags);
 
 		vsi = &cm_node->iwdev->vsi;
-		dev = cm_node->dev;
 
 		if (!cm_node->ack_rcvd) {
 			atomic_inc(&send_entry->sqbuf->refcount);
@@ -2411,6 +2409,7 @@ static void i40iw_handle_rst_pkt(struct i40iw_cm_node *cm_node,
 	case I40IW_CM_STATE_FIN_WAIT1:
 	case I40IW_CM_STATE_LAST_ACK:
 		cm_node->cm_id->rem_ref(cm_node->cm_id);
+		/* fall through */
 	case I40IW_CM_STATE_TIME_WAIT:
 		cm_node->state = I40IW_CM_STATE_CLOSED;
 		i40iw_rem_ref_cm_node(cm_node);
@@ -3203,8 +3202,7 @@ void i40iw_setup_cm_core(struct i40iw_device *iwdev)
 	INIT_LIST_HEAD(&cm_core->connected_nodes);
 	INIT_LIST_HEAD(&cm_core->listen_nodes);
 
-	setup_timer(&cm_core->tcp_timer, i40iw_cm_timer_tick,
-		    (unsigned long)cm_core);
+	timer_setup(&cm_core->tcp_timer, i40iw_cm_timer_tick, 0);
 
 	spin_lock_init(&cm_core->ht_lock);
 	spin_lock_init(&cm_core->listen_list_lock);

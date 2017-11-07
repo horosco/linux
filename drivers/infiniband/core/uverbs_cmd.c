@@ -2521,7 +2521,6 @@ ssize_t ib_uverbs_create_ah(struct ib_uverbs_file *file,
 	struct rdma_ah_attr		attr;
 	int ret;
 	struct ib_udata                   udata;
-	u8				*dmac;
 
 	if (out_len < sizeof resp)
 		return -ENOSPC;
@@ -2564,20 +2563,13 @@ ssize_t ib_uverbs_create_ah(struct ib_uverbs_file *file,
 	} else {
 		rdma_ah_set_ah_flags(&attr, 0);
 	}
-	dmac = rdma_ah_retrieve_dmac(&attr);
-	if (dmac)
-		memset(dmac, 0, ETH_ALEN);
 
-	ah = pd->device->create_ah(pd, &attr, &udata);
-
+	ah = rdma_create_user_ah(pd, &attr, &udata);
 	if (IS_ERR(ah)) {
 		ret = PTR_ERR(ah);
 		goto err_put;
 	}
 
-	ah->device  = pd->device;
-	ah->pd      = pd;
-	atomic_inc(&pd->usecnt);
 	ah->uobject  = uobj;
 	uobj->user_handle = cmd.user_handle;
 	uobj->object = ah;
@@ -3850,15 +3842,15 @@ int ib_uverbs_ex_query_device(struct ib_uverbs_file *file,
 	resp.raw_packet_caps = attr.raw_packet_caps;
 	resp.response_length += sizeof(resp.raw_packet_caps);
 
-	if (ucore->outlen < resp.response_length + sizeof(resp.xrq_caps))
+	if (ucore->outlen < resp.response_length + sizeof(resp.tm_caps))
 		goto end;
 
-	resp.xrq_caps.max_rndv_hdr_size = attr.xrq_caps.max_rndv_hdr_size;
-	resp.xrq_caps.max_num_tags      = attr.xrq_caps.max_num_tags;
-	resp.xrq_caps.max_ops		= attr.xrq_caps.max_ops;
-	resp.xrq_caps.max_sge		= attr.xrq_caps.max_sge;
-	resp.xrq_caps.flags		= attr.xrq_caps.flags;
-	resp.response_length += sizeof(resp.xrq_caps);
+	resp.tm_caps.max_rndv_hdr_size	= attr.tm_caps.max_rndv_hdr_size;
+	resp.tm_caps.max_num_tags	= attr.tm_caps.max_num_tags;
+	resp.tm_caps.max_ops		= attr.tm_caps.max_ops;
+	resp.tm_caps.max_sge		= attr.tm_caps.max_sge;
+	resp.tm_caps.flags		= attr.tm_caps.flags;
+	resp.response_length += sizeof(resp.tm_caps);
 end:
 	err = ib_copy_to_udata(ucore, &resp, resp.response_length);
 	return err;
